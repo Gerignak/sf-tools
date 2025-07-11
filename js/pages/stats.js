@@ -1,6 +1,6 @@
 // Helper class
 class DynamicLoader {
-    constructor (container) {
+    constructor(container) {
         this.callback = null;
         this.observer = new IntersectionObserver(
             () => this._callback(),
@@ -11,25 +11,25 @@ class DynamicLoader {
         this.observer.observe(this.observed);
     }
 
-    _callback () {
+    _callback() {
         if (this.callback) {
             this.callback();
         }
     }
 
-    start (callback) {
+    start(callback) {
         this.callback = callback;
         this.callback();
     }
 
-    stop () {
+    stop() {
         this.callback = null;
     }
 }
 
 // Context menu handler
 class CustomMenu {
-    constructor (parent, items) {
+    constructor(parent, items) {
         this.parent = parent;
         this.source = null;
         this.timer = null;
@@ -73,7 +73,7 @@ class CustomMenu {
         })
     }
 
-    attach (elements) {
+    attach(elements) {
         this.source = null;
 
         for (const element of elements) {
@@ -91,15 +91,15 @@ class CustomMenu {
         }
     }
 
-    #visible () {
+    #visible() {
         return this.container.classList.contains('visible');
     }
 
-    #hidden () {
+    #hidden() {
         return this.container.classList.contains('hidden');
     }
 
-    #startTimer () {
+    #startTimer() {
         if (this.timer) {
             return;
         }
@@ -110,7 +110,7 @@ class CustomMenu {
         );
     }
 
-    #endTimer () {
+    #endTimer() {
         if (this.timer) {
             clearTimeout(this.timer);
 
@@ -118,7 +118,7 @@ class CustomMenu {
         }
     }
 
-    #show (element, x, y) {
+    #show(element, x, y) {
         this.source = element;
 
         this.container.style.left = `${x}px`;
@@ -132,7 +132,7 @@ class CustomMenu {
         this.#startTimer();
     }
 
-    #hide () {
+    #hide() {
         if (this.#visible()) {
             $(this.container).transition('fade').hide();
         }
@@ -154,12 +154,13 @@ const PLAYER_CLASS_SEARCH = [
     'druid',
     'bard',
     'necromancer',
-    'paladin'
+    'paladin',
+    'plague doctor'
 ];
 
 // Group Detail View
 class GroupTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$table = this.$parent.find('[data-op="table"]');
@@ -182,7 +183,7 @@ class GroupTab extends Tab {
         // Copy
         this.$parent.find('[data-op="copy"]').click(() => {
             var node = document.createElement('div');
-            node.innerHTML = `${ _formatDate(Number(this.timestamp)) } - ${ _formatDate(Number(this.reference)) }`;
+            node.innerHTML = `${_formatDate(Number(this.timestamp))} - ${_formatDate(Number(this.reference))}`;
 
             document.body.prepend(node);
             var range = document.createRange();
@@ -222,7 +223,7 @@ class GroupTab extends Tab {
                     $tableBody.children(":first").after(timestampRow);
                 } else {
                     $tableBody.prepend(timestampRow);
-                }                
+                }
             }).then((blob) => {
                 Exporter.png(blob, `${this.group.Latest.Name}.${this.timestamp}${this.timestamp != this.reference ? `.${this.reference}` : ''}`);
             });
@@ -240,9 +241,9 @@ class GroupTab extends Tab {
             Dialog.open(
                 ExportFileDialog,
                 {
-                    currentWithReference: createExport([ this.timestamp, this.reference ]),
-                    current: createExport([ this.timestamp ]),
-                    last: createExport([ _dig(this.list, 0, 'Timestamp') ]),
+                    currentWithReference: createExport([this.timestamp, this.reference]),
+                    current: createExport([this.timestamp]),
+                    last: createExport([_dig(this.list, 0, 'Timestamp')]),
                     last5: createExport(this.list.slice(0, 5).map(entry => entry.Timestamp)),
                     all: createExport(this.list.map(entry => entry.Timestamp))
                 },
@@ -286,7 +287,7 @@ class GroupTab extends Tab {
         this.$reference = this.$parent.find('[data-op="reference"]');
     }
 
-    refreshQuickSwapDropdown () {
+    refreshQuickSwapDropdown() {
         this.$configure.dropdown({
             on: 'contextmenu',
             showOnFocus: false,
@@ -317,12 +318,12 @@ class GroupTab extends Tab {
                     type: 'header',
                     class: 'header font-bold !text-center'
                 },
-                ... Scripts.sortedList('group').map(({ key: value, name }) => ({ name, value }))
+                ...Scripts.sortedList('group').map(({ key: value, name }) => ({ name, value }))
             ]
         });
     }
 
-    show ({ identifier }) {
+    show({ identifier }) {
         this.refreshQuickSwapDropdown();
 
         this.identifier = identifier;
@@ -402,7 +403,7 @@ class GroupTab extends Tab {
         this.load();
     }
 
-    load () {
+    load() {
         this.scriptOverride = null;
         this.$configure.find('.item').removeClass('active');
 
@@ -472,7 +473,7 @@ class GroupTab extends Tab {
             reference: _safeInt(this.reference)
         });
 
-        members.forEach(function (player) {
+        members.forEach(function(player) {
             entries.add(player, membersReferences.find(c => c.LinkId == player.LinkId));
         });
 
@@ -481,11 +482,11 @@ class GroupTab extends Tab {
         this.refresh();
     }
 
-    refresh () {
+    refresh() {
         this.table.refresh();
     }
 
-    reload () {
+    reload() {
         this.scriptOverride = '';
         this.refreshQuickSwapDropdown();
         this.load();
@@ -493,7 +494,7 @@ class GroupTab extends Tab {
 }
 
 class PlayerTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$table = this.$parent.find('[data-op="table"]');
@@ -561,12 +562,12 @@ class PlayerTab extends Tab {
         });
 
         this.$parent.operator('export').click(() => {
-            const createExport = (timestamps) => (() => DatabaseManager.export([ this.identifier ], timestamps))
+            const createExport = (timestamps) => (() => DatabaseManager.export([this.identifier], timestamps))
 
             Dialog.open(
                 ExportFileDialog,
                 {
-                    last: createExport([ _dig(this.list, 0, 'Timestamp') ]),
+                    last: createExport([_dig(this.list, 0, 'Timestamp')]),
                     last5: createExport(this.list.slice(0, 5).map(entry => entry.Timestamp)),
                     all: createExport()
                 },
@@ -578,7 +579,7 @@ class PlayerTab extends Tab {
         this.$identifier = this.$parent.find('[data-op="identifier"]');
     }
 
-    refreshQuickSwapDropdown () {
+    refreshQuickSwapDropdown() {
         this.$configure.dropdown({
             on: 'contextmenu',
             showOnFocus: false,
@@ -608,12 +609,12 @@ class PlayerTab extends Tab {
                     type: 'header',
                     class: 'header font-bold !text-center'
                 },
-                ... Scripts.sortedList('player').map(({ key: value, name }) => ({ name, value }))
+                ...Scripts.sortedList('player').map(({ key: value, name }) => ({ name, value }))
             ]
         });
     }
 
-    show ({ identifier }) {
+    show({ identifier }) {
         this.refreshQuickSwapDropdown();
         this.identifier = identifier;
 
@@ -637,7 +638,7 @@ class PlayerTab extends Tab {
         this.load();
     }
 
-    load () {
+    load() {
         this.scriptOverride = null;
         this.$configure.find('.item').removeClass('active');
 
@@ -648,23 +649,23 @@ class PlayerTab extends Tab {
 
         // Configuration indicator
         DOM.settingsButton(this.$configure.get(0), Scripts.isAssigned(this.identifier));
-        
+
         this.refresh();
     }
 
-    refresh () {
+    refresh() {
         this.table.setEntries(this.array);
         this.table.refresh();
     }
 
-    reload () {
+    reload() {
         this.refreshQuickSwapDropdown();
         this.load();
     }
 }
 
 class GroupsTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$table1 = this.$parent.find('[data-op="table1"]');
@@ -714,8 +715,8 @@ class GroupsTab extends Tab {
             });
         });
 
-         // Context menu
-         this.contextMenu = new CustomMenu(
+        // Context menu
+        this.contextMenu = new CustomMenu(
             this.$parent.get(0),
             [
                 {
@@ -744,7 +745,7 @@ class GroupsTab extends Tab {
 
                         Dialog.open(
                             ExportFileDialog,
-                            () => DatabaseManager.export(_uniq([ ...cleanedIds, ...cleanedMembers ].flat())),
+                            () => DatabaseManager.export(_uniq([...cleanedIds, ...cleanedMembers].flat())),
                             'groups'
                         )
                     }
@@ -821,20 +822,20 @@ class GroupsTab extends Tab {
 
             var terms = [
                 {
-                   test: function (arg, current) {
-                       var matches = arg.reduce((total, term) => {
-                           var subterms = term.split('|').map(rarg => rarg.trim());
-                           for (var subterm of subterms) {
-                               if (current.Name.toLowerCase().includes(subterm) || current.Prefix.toLowerCase().includes(subterm)) {
-                                   return total + 1;
-                               }
-                           }
+                    test: function(arg, current) {
+                        var matches = arg.reduce((total, term) => {
+                            var subterms = term.split('|').map(rarg => rarg.trim());
+                            for (var subterm of subterms) {
+                                if (current.Name.toLowerCase().includes(subterm) || current.Prefix.toLowerCase().includes(subterm)) {
+                                    return total + 1;
+                                }
+                            }
 
-                           return total;
-                       }, 0);
-                       return (matches == arg.length);
-                   },
-                   arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
+                            return total;
+                        }, 0);
+                        return (matches == arg.length);
+                    },
+                    arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
                 }
             ];
 
@@ -912,7 +913,7 @@ class GroupsTab extends Tab {
                     });
                     this.recalculate = true;
                     this.shidden = true;
-                } else if (key == 'q' && typeof(arg) == 'string' && arg.length) {
+                } else if (key == 'q' && typeof (arg) == 'string' && arg.length) {
                     this.tableQEnabled = true;
                     this.recalculate = true;
 
@@ -920,8 +921,8 @@ class GroupsTab extends Tab {
                     this.table.clearSorting();
 
                     this.table = this.tableQ;
-                    this.table.setScript(`category${ arg.split(',').reduce((c, a) => c + `\nheader ${ a.trim() }`, '') }`);
-                } else if (key == 't' && typeof(arg) == 'string' && arg.length) {
+                    this.table.setScript(`category${arg.split(',').reduce((c, a) => c + `\nheader ${a.trim()}`, '')}`);
+                } else if (key == 't' && typeof (arg) == 'string' && arg.length) {
                     let script = await this.tryGetSettings(arg.trim());
                     if (script) {
                         this.tableQEnabled = true;
@@ -959,7 +960,7 @@ class GroupsTab extends Tab {
 
                         const compare = list.concat().reverse().find((entry) => entry.Timestamp >= this.reference && entry.Timestamp <= timestamp) || current;
                         const reference = compare.Timestamp;
-                        
+
                         if (terms.every((term) => term.test(term.arg, current, this.timestamp, reference))) {
                             entries.add(
                                 current,
@@ -980,7 +981,7 @@ class GroupsTab extends Tab {
         });
     }
 
-    tableSubscribe (table) {
+    tableSubscribe(table) {
         table.subscribe('inject', (element) => {
             const clickableElements = Array.from(element.querySelectorAll('[data-id]'));
             for (const clickableElement of clickableElements) {
@@ -1001,7 +1002,7 @@ class GroupsTab extends Tab {
         });
     }
 
-    async tryGetSettings (code) {
+    async tryGetSettings(code) {
         if (typeof this.settingsRepo == 'undefined') {
             this.settingsRepo = {};
         }
@@ -1013,7 +1014,7 @@ class GroupsTab extends Tab {
         return this.settingsRepo[code];
     }
 
-    updateSelectors () {
+    updateSelectors() {
         const timestamps = [];
         const references = [];
 
@@ -1065,7 +1066,7 @@ class GroupsTab extends Tab {
                         this.$filter.trigger('change');
                     }
                 });
-    
+
                 this.$filter.trigger('change');
             }
         })
@@ -1079,7 +1080,7 @@ class GroupsTab extends Tab {
         });
     }
 
-    show (params) {
+    show(params) {
         const nonBrowseOrigin = params && params.origin !== this;
         // const nonUpdated = this.lastDatabaseChange === DatabaseManager.LastChange && this.lastScriptChange === Scripts.LastChange;
 
@@ -1095,15 +1096,15 @@ class GroupsTab extends Tab {
 
             this.tableBase.resetInjector();
             this.tableQ.resetInjector();
-    
+
             this.refreshQuickSwapDropdown();
             this.updateSelectors();
-    
+
             this.load();
         }
     }
 
-    load () {
+    load() {
         // Configuration indicator
         this.$configure.find('.item').removeClass('active');
         DOM.settingsButton(this.$configure.get(0), Scripts.isAssigned('groups'));
@@ -1115,7 +1116,7 @@ class GroupsTab extends Tab {
         this.$filter.trigger('change');
     }
 
-    refreshQuickSwapDropdown () {
+    refreshQuickSwapDropdown() {
         this.$configure.dropdown({
             on: 'contextmenu',
             showOnFocus: false,
@@ -1146,12 +1147,12 @@ class GroupsTab extends Tab {
                     type: 'header',
                     class: 'header font-bold !text-center'
                 },
-                ... Scripts.sortedList('groups').map(({ key: value, name }) => ({ name, value }))
+                ...Scripts.sortedList('groups').map(({ key: value, name }) => ({ name, value }))
             ]
         });
     }
 
-    _toggleTable (table) {
+    _toggleTable(table) {
         if (table === this.table) {
             table.element.style.display = '';
         } else {
@@ -1159,21 +1160,21 @@ class GroupsTab extends Tab {
         }
     }
 
-    refresh () {
+    refresh() {
         this._toggleTable(this.tableBase);
         this._toggleTable(this.tableQ);
 
         this.table.refresh();
     }
 
-    reload () {
+    reload() {
         this.refreshQuickSwapDropdown();
         this.load();
     }
 }
 
 class PlayersTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$table1 = this.$parent.find('[data-op="table1"]');
@@ -1348,20 +1349,20 @@ class PlayersTab extends Tab {
 
             var terms = [
                 {
-                   test: function (arg, player, timestamp) {
-                       var matches = arg.reduce((total, term) => {
-                           var subterms = term.split('|').map(rarg => rarg.trim());
-                           for (var subterm of subterms) {
-                               if (player.Name.toLowerCase().includes(subterm) || player.Prefix.toLowerCase().includes(subterm) || PLAYER_CLASS_SEARCH[player.Class].includes(subterm) || (player.hasGuild() && player.Group.Name.toLowerCase().includes(subterm))) {
-                                   return total + 1;
-                               }
-                           }
+                    test: function(arg, player, timestamp) {
+                        var matches = arg.reduce((total, term) => {
+                            var subterms = term.split('|').map(rarg => rarg.trim());
+                            for (var subterm of subterms) {
+                                if (player.Name.toLowerCase().includes(subterm) || player.Prefix.toLowerCase().includes(subterm) || PLAYER_CLASS_SEARCH[player.Class].includes(subterm) || (player.hasGuild() && player.Group.Name.toLowerCase().includes(subterm))) {
+                                    return total + 1;
+                                }
+                            }
 
-                           return total;
-                       }, 0);
-                       return (matches == arg.length);
-                   },
-                   arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
+                            return total;
+                        }, 0);
+                        return (matches == arg.length);
+                    },
+                    arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
                 }
             ];
 
@@ -1465,7 +1466,7 @@ class PlayersTab extends Tab {
                     });
                     this.recalculate = true;
                     this.shidden = true;
-                } else if (key == 'q' && typeof(arg) == 'string' && arg.length) {
+                } else if (key == 'q' && typeof (arg) == 'string' && arg.length) {
                     this.tableQEnabled = true;
                     this.recalculate = true;
 
@@ -1473,8 +1474,8 @@ class PlayersTab extends Tab {
                     this.table.clearSorting();
 
                     this.table = this.tableQ;
-                    this.table.setScript(`category${ arg.split(',').reduce((c, a) => c + `\nheader ${ a.trim() }`, '') }`);
-                } else if (key == 't' && typeof(arg) == 'string' && arg.length) {
+                    this.table.setScript(`category${arg.split(',').reduce((c, a) => c + `\nheader ${a.trim()}`, '')}`);
+                } else if (key == 't' && typeof (arg) == 'string' && arg.length) {
                     let script = await this.tryGetSettings(arg.trim());
                     if (script) {
                         this.tableQEnabled = true;
@@ -1510,7 +1511,7 @@ class PlayersTab extends Tab {
 
                         const comparePlayer = list.concat().reverse().find((entry) => entry.Timestamp >= this.reference && entry.Timestamp <= timestamp) || currentPlayer;
                         const reference = comparePlayer.Timestamp;
-                        
+
                         if (terms.every((term) => term.test(term.arg, DatabaseManager.loadPlayer(currentPlayer), this.timestamp, reference))) {
                             entries.add(
                                 DatabaseManager.loadPlayer(currentPlayer),
@@ -1531,7 +1532,7 @@ class PlayersTab extends Tab {
         });
     }
 
-    tableSubscribe (table) {
+    tableSubscribe(table) {
         table.subscribe('inject', (element) => {
             const clickableElements = Array.from(element.querySelectorAll('[data-id]'));
             for (const clickableElement of clickableElements) {
@@ -1552,7 +1553,7 @@ class PlayersTab extends Tab {
         });
     }
 
-    async tryGetSettings (code) {
+    async tryGetSettings(code) {
         if (typeof this.settingsRepo == 'undefined') {
             this.settingsRepo = {};
         }
@@ -1564,7 +1565,7 @@ class PlayersTab extends Tab {
         return this.settingsRepo[code];
     }
 
-    updateSelectors () {
+    updateSelectors() {
         const timestamps = [];
         const references = [];
 
@@ -1616,7 +1617,7 @@ class PlayersTab extends Tab {
                         this.$filter.trigger('change');
                     }
                 });
-    
+
                 this.$filter.trigger('change');
             }
         })
@@ -1630,7 +1631,7 @@ class PlayersTab extends Tab {
         });
     }
 
-    show (params) {
+    show(params) {
         const nonBrowseOrigin = params && params.origin !== this;
         const nonUpdated = this.lastDatabaseChange === DatabaseManager.LastChange && this.lastScriptChange === Scripts.LastChange;
 
@@ -1646,15 +1647,15 @@ class PlayersTab extends Tab {
 
             this.tableBase.resetInjector();
             this.tableQ.resetInjector();
-    
+
             this.refreshQuickSwapDropdown();
             this.updateSelectors();
-    
+
             this.load();
         }
     }
 
-    load () {
+    load() {
         // Configuration indicator
         this.$configure.find('.item').removeClass('active');
         DOM.settingsButton(this.$configure.get(0), Scripts.isAssigned('players'));
@@ -1666,7 +1667,7 @@ class PlayersTab extends Tab {
         this.$filter.trigger('change');
     }
 
-    refreshQuickSwapDropdown () {
+    refreshQuickSwapDropdown() {
         this.$configure.dropdown({
             on: 'contextmenu',
             showOnFocus: false,
@@ -1697,12 +1698,12 @@ class PlayersTab extends Tab {
                     type: 'header',
                     class: 'header font-bold !text-center'
                 },
-                ... Scripts.sortedList('players').map(({ key: value, name }) => ({ name, value }))
+                ...Scripts.sortedList('players').map(({ key: value, name }) => ({ name, value }))
             ]
         });
     }
 
-    _toggleTable (table) {
+    _toggleTable(table) {
         if (table === this.table) {
             table.element.style.display = '';
         } else {
@@ -1710,14 +1711,14 @@ class PlayersTab extends Tab {
         }
     }
 
-    refresh () {
+    refresh() {
         this._toggleTable(this.tableBase);
         this._toggleTable(this.tableQ);
 
         this.table.refresh();
     }
 
-    reload () {
+    reload() {
         this.refreshQuickSwapDropdown();
         this.load();
     }
@@ -1725,7 +1726,7 @@ class PlayersTab extends Tab {
 
 // Groups View
 class GroupsGridTab extends Tab {
-    _prepareOption (operator, key, storeKey) {
+    _prepareOption(operator, key, storeKey) {
         DOM.toggle({
             element: this.$parent.operator(operator).get(0),
             value: Site.options[storeKey],
@@ -1738,7 +1739,7 @@ class GroupsGridTab extends Tab {
         return Site.options[storeKey];
     }
 
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$list = this.$parent.find('[data-op="list"]');
@@ -1826,20 +1827,20 @@ class GroupsGridTab extends Tab {
 
             var terms = [
                 {
-                   test: function (arg, group) {
-                       var matches = arg.reduce((total, term) => {
-                           var subterms = term.split('|').map(rarg => rarg.trim());
-                           for (var subterm of subterms) {
-                               if (group.Name.toLowerCase().includes(subterm) || group.Prefix.toLowerCase().includes(subterm)) {
-                                   return total + 1;
-                               }
-                           }
+                    test: function(arg, group) {
+                        var matches = arg.reduce((total, term) => {
+                            var subterms = term.split('|').map(rarg => rarg.trim());
+                            for (var subterm of subterms) {
+                                if (group.Name.toLowerCase().includes(subterm) || group.Prefix.toLowerCase().includes(subterm)) {
+                                    return total + 1;
+                                }
+                            }
 
-                           return total;
-                       }, 0);
-                       return (matches == arg.length);
-                   },
-                   arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
+                            return total;
+                        }, 0);
+                        return (matches == arg.length);
+                    },
+                    arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
                 }
             ];
 
@@ -1914,7 +1915,7 @@ class GroupsGridTab extends Tab {
         });
     }
 
-    show () {
+    show() {
         const viewableGroups = Object.entries(DatabaseManager.Groups);
         if (Site.options.skip_grid_if_single_entry_present && viewableGroups.length == 1 && (Site.options.groups_empty || viewableGroups[0][1].List.filter((g) => g.MembersPresent).length > 0)) {
             UI.show(UI.group, { identifier: viewableGroups[0][0] });
@@ -1923,7 +1924,7 @@ class GroupsGridTab extends Tab {
         }
     }
 
-    #refreshActions () {
+    #refreshActions() {
         const checkedItems = this.#selection;
 
         if (checkedItems.length > 0) {
@@ -1945,17 +1946,17 @@ class GroupsGridTab extends Tab {
         }
     }
 
-    get #selection () {
+    get #selection() {
         return this.$list.find('.checkbox input:checked').get().map((item) => item.dataset.checkboxId);
     }
 
-    #clearSelection () {
+    #clearSelection() {
         this.$list.find('.checkbox').checkbox('set unchecked');
 
         this.#refreshActions();
     }
 
-    refresh () {
+    refresh() {
         this.$list.empty();
 
         this.#refreshActions();
@@ -1982,11 +1983,11 @@ class GroupsGridTab extends Tab {
         for (const group of filteredEntries) {
             items.push(`
                 <div class="column">
-                    <div class="ui basic ${latestPlayerTimestamp != (this.empty ? group.LatestTimestamp : group.LatestDisplayTimestamp) ? 'red' : 'grey'} inverted segment cursor-pointer !p-0 !border-radius-1 flex flex-col items-center ${ DatabaseManager.isIdentifierHidden(group.Latest.LinkId) ? 'opacity-50' : '' }" data-id="${ group.Latest.LinkId }" style="height: 270px;">
-                        <span class="text-85% my-2">${ _formatDate(this.empty ? group.LatestTimestamp : group.LatestDisplayTimestamp) }</span>
+                    <div class="ui basic ${latestPlayerTimestamp != (this.empty ? group.LatestTimestamp : group.LatestDisplayTimestamp) ? 'red' : 'grey'} inverted segment cursor-pointer !p-0 !border-radius-1 flex flex-col items-center ${DatabaseManager.isIdentifierHidden(group.Latest.LinkId) ? 'opacity-50' : ''}" data-id="${group.Latest.LinkId}" style="height: 270px;">
+                        <span class="text-85% my-2">${_formatDate(this.empty ? group.LatestTimestamp : group.LatestDisplayTimestamp)}</span>
                         <img class="ui image" src="res/group.png" width="173" height="173">
-                        <h3 class="ui grey header !m-0 !mt-2">${ group.Latest.Prefix }</h3>
-                        <h3 class="ui inverted header !mt-0 !mb-1">${ group.Latest.Name }</h3>
+                        <h3 class="ui grey header !m-0 !mt-2">${group.Latest.Prefix}</h3>
+                        <h3 class="ui inverted header !mt-0 !mb-1">${group.Latest.Name}</h3>
                         <div class="ui fitted checkbox" style="position: absolute; left: 0.5em; top: 0.5em;">
                             <input type="checkbox" data-checkbox-id="${group.Latest.LinkId}">
                         </div>
@@ -1996,7 +1997,7 @@ class GroupsGridTab extends Tab {
         }
 
         this.loader.start(() => {
-            const blockClickable = $(items.splice(0, 20).join('')).appendTo(this.$list).find('[data-id]').click(function (event) {
+            const blockClickable = $(items.splice(0, 20).join('')).appendTo(this.$list).find('[data-id]').click(function(event) {
                 if (event.target.closest('.checkbox')) {
                     return;
                 } else if (event.ctrlKey) {
@@ -2022,14 +2023,14 @@ class GroupsGridTab extends Tab {
         });
     }
 
-    load () {
+    load() {
         this.$filter.trigger('change');
     }
 }
 
 // Players View
 class PlayersGridTab extends Tab {
-    _prepareOption (operator, key, storeKey) {
+    _prepareOption(operator, key, storeKey) {
         DOM.toggle({
             element: this.$parent.operator(operator).get(0),
             value: Site.options[storeKey],
@@ -2042,7 +2043,7 @@ class PlayersGridTab extends Tab {
         return Site.options[storeKey];
     }
 
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$list = this.$parent.find('[data-op="list"]');
@@ -2052,7 +2053,7 @@ class PlayersGridTab extends Tab {
         // Toggles
         this.hidden = this._prepareOption('show-hidden', 'hidden', 'players_hidden');
         this.others = this._prepareOption('show-other', 'others', 'players_other');
-        
+
         // Observer
         this.loader = new DynamicLoader(this.$list.get(0));
 
@@ -2121,20 +2122,20 @@ class PlayersGridTab extends Tab {
 
             var terms = [
                 {
-                   test: function (arg, player) {
-                       var matches = arg.reduce((total, term) => {
-                           var subterms = term.split('|').map(rarg => rarg.trim());
-                           for (var subterm of subterms) {
-                               if (player.Name.toLowerCase().includes(subterm) || player.Prefix.toLowerCase().includes(subterm) || PLAYER_CLASS_SEARCH[player.Class].includes(subterm) || (player.hasGuild() && player.Group.Name.toLowerCase().includes(subterm))) {
-                                   return total + 1;
-                               }
-                           }
+                    test: function(arg, player) {
+                        var matches = arg.reduce((total, term) => {
+                            var subterms = term.split('|').map(rarg => rarg.trim());
+                            for (var subterm of subterms) {
+                                if (player.Name.toLowerCase().includes(subterm) || player.Prefix.toLowerCase().includes(subterm) || PLAYER_CLASS_SEARCH[player.Class].includes(subterm) || (player.hasGuild() && player.Group.Name.toLowerCase().includes(subterm))) {
+                                    return total + 1;
+                                }
+                            }
 
-                           return total;
-                       }, 0);
-                       return (matches == arg.length);
-                   },
-                   arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
+                            return total;
+                        }, 0);
+                        return (matches == arg.length);
+                    },
+                    arg: filter[0].toLowerCase().split('&').map(rarg => rarg.trim())
                 }
             ];
 
@@ -2242,7 +2243,7 @@ class PlayersGridTab extends Tab {
         });
     }
 
-    show () {
+    show() {
         let identitifiers = Object.keys(DatabaseManager.Players);
         if (Site.options.skip_grid_if_single_entry_present && identitifiers.length == 1) {
             UI.show(UI.player, { identifier: identitifiers[0] });
@@ -2251,7 +2252,7 @@ class PlayersGridTab extends Tab {
         }
     }
 
-    #refreshActions () {
+    #refreshActions() {
         const checkedItems = this.#selection;
 
         if (checkedItems.length > 0) {
@@ -2273,17 +2274,17 @@ class PlayersGridTab extends Tab {
         }
     }
 
-    get #selection () {
+    get #selection() {
         return this.$list.find('.checkbox input:checked').get().map((item) => item.dataset.checkboxId);
     }
 
-    #clearSelection () {
+    #clearSelection() {
         this.$list.find('.checkbox').checkbox('set unchecked');
 
         this.#refreshActions();
     }
 
-    refresh () {
+    refresh() {
         this.$list.empty();
 
         this.#refreshActions();
@@ -2291,19 +2292,19 @@ class PlayersGridTab extends Tab {
         const filteredEntries = this.entries.filter(player => {
             const visible = !DatabaseManager.isIdentifierHidden(player.Latest.LinkId);
             const own = player.Own;
-            
+
             return (visible || this.hidden || this.hidden_override) && (own || this.others || this.others_override);
         })
-        
+
         const items = [];
         for (const player of filteredEntries) {
             items.push(`
                 <div class="column">
-                    <div class="ui basic inverted ${DatabaseManager.Latest != player.LatestTimestamp ? 'red' : 'grey'} segment cursor-pointer !p-0 !border-radius-1 flex flex-col items-center ${ DatabaseManager.isIdentifierHidden(player.Latest.LinkId) ? 'opacity-50' : '' }" data-id="${ player.Latest.LinkId }" style="height: 270px;">
-                        <span class="text-85% my-2">${ _formatDate(player.LatestTimestamp) }</span>
+                    <div class="ui basic inverted ${DatabaseManager.Latest != player.LatestTimestamp ? 'red' : 'grey'} segment cursor-pointer !p-0 !border-radius-1 flex flex-col items-center ${DatabaseManager.isIdentifierHidden(player.Latest.LinkId) ? 'opacity-50' : ''}" data-id="${player.Latest.LinkId}" style="height: 270px;">
+                        <span class="text-85% my-2">${_formatDate(player.LatestTimestamp)}</span>
                         <img class="ui image" src="${_classImageUrl(player.Latest.Class)}" width="173" height="173">
-                        <h3 class="ui grey header !m-0 !mt-2">${ player.Latest.Prefix }</h3>
-                        <h3 class="ui inverted header !mt-0 !mb-1">${ player.Latest.Name }</h3>
+                        <h3 class="ui grey header !m-0 !mt-2">${player.Latest.Prefix}</h3>
+                        <h3 class="ui inverted header !mt-0 !mb-1">${player.Latest.Name}</h3>
                         <div class="ui fitted checkbox" style="position: absolute; left: 0.5em; top: 0.5em;">
                             <input type="checkbox" data-checkbox-id="${player.Latest.LinkId}">
                         </div>
@@ -2313,7 +2314,7 @@ class PlayersGridTab extends Tab {
         }
 
         this.loader.start(() => {
-            const blockClickable = $(items.splice(0, 20).join('')).appendTo(this.$list).find('[data-id]').click(function (event) {
+            const blockClickable = $(items.splice(0, 20).join('')).appendTo(this.$list).find('[data-id]').click(function(event) {
                 if (event.target.closest('.checkbox')) {
                     return;
                 } else if (event.ctrlKey) {
@@ -2335,7 +2336,7 @@ class PlayersGridTab extends Tab {
         this.#refreshActions();
     }
 
-    load () {
+    load() {
         this.$filter.trigger('change');
     }
 }
@@ -2343,7 +2344,7 @@ class PlayersGridTab extends Tab {
 // Files View
 class FilesTab extends Tab {
     // Export all to json file
-    exportAll () {
+    exportAll() {
         Dialog.open(
             ExportFileDialog,
             () => DatabaseManager.export(),
@@ -2352,7 +2353,7 @@ class FilesTab extends Tab {
     }
 
     // Export selected to cloud
-    exportSelected () {
+    exportSelected() {
         if (this.simple) {
             if (this.selectedFiles.size === 0) return;
 
@@ -2382,7 +2383,7 @@ class FilesTab extends Tab {
         }
     }
 
-    tagSelected () {
+    tagSelected() {
         if (this.simple) {
             if (this.selectedFiles.size > 0) {
                 Dialog.open(TagDialog, 'timestamps', Array.from(this.selectedFiles)).then(([value]) => {
@@ -2407,7 +2408,7 @@ class FilesTab extends Tab {
     }
 
     // Delete all
-    deleteAll () {
+    deleteAll() {
         Dialog.open(
             ConfirmationDialog,
             intl('dialog.delete_all.title'),
@@ -2423,7 +2424,7 @@ class FilesTab extends Tab {
     }
 
     // Delete selected
-    deleteSelected () {
+    deleteSelected() {
         if (this.simple) {
             if (this.selectedFiles.size > 0) {
                 DatabaseManager.safeRemove({ timestamps: Array.from(this.selectedFiles) }).then(([value]) => {
@@ -2438,7 +2439,7 @@ class FilesTab extends Tab {
     }
 
     // Merge selected
-    mergeSelected () {
+    mergeSelected() {
         if (this.simple) {
             if (this.selectedFiles.size > 1) {
                 Loader.toggle(true);
@@ -2454,22 +2455,22 @@ class FilesTab extends Tab {
     }
 
     // Hide selected
-    hideSelected () {
+    hideSelected() {
         Loader.toggle(true);
         if (this.simple) {
-            DatabaseManager.hideTimestamps(... Array.from(this.selectedFiles)).then(() => this.show());
+            DatabaseManager.hideTimestamps(...Array.from(this.selectedFiles)).then(() => this.show());
         } else {
             DatabaseManager.hide(Array.from(this.selectedEntries.values())).then(() => this.show());
         }
     }
 
-    hideMigrate () {
+    hideMigrate() {
         Loader.toggle(true);
         DatabaseManager.migrateHiddenFiles().then(() => this.show());
     }
 
     // Import file via har
-    importJson (fileEvent) {
+    importJson(fileEvent) {
         Loader.toggle(true, { progress: true });
 
         const files = Array.from(fileEvent.currentTarget.files);
@@ -2494,28 +2495,28 @@ class FilesTab extends Tab {
     }
 
     // Import file via endpoint
-    importEndpoint () {
+    importEndpoint() {
         Dialog.open(EndpointDialog, false).then(([value]) => {
             if (value) this.show();
         });
     }
 
     // Import file via cloud
-    importCloud () {
+    importCloud() {
         Dialog.open(ImportFileDialog).then(([value]) => {
             if (value) this.show();
         });
     }
 
     // Prepare checkbox
-    prepareCheckbox (property, name) {
-        this.$parent.find(`[data-op="checkbox-${ name }"]`).checkbox({
+    prepareCheckbox(property, name) {
+        this.$parent.find(`[data-op="checkbox-${name}"]`).checkbox({
             onChecked: () => { Site.options[property] = true },
             onUnchecked: () => { Site.options[property] = false }
         }).checkbox(Site.options[property] ? 'set checked' : 'set unchecked');
     }
 
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$fileCounter = this.$parent.find('[data-op="selected-counter"]');
@@ -2568,7 +2569,7 @@ class FilesTab extends Tab {
         this.setLayout(Site.options.advanced, true);
     }
 
-    setLayout (advanced, supressUpdate = false) {
+    setLayout(advanced, supressUpdate = false) {
         window.scrollTo({ top: 0 });
 
         this.$advancedCenter.toggle(advanced);
@@ -2577,7 +2578,7 @@ class FilesTab extends Tab {
         if (!supressUpdate) this.show({ forceUpdate: true });
     }
 
-    markAll () {
+    markAll() {
         if (this.simple) {
             let filesToMark = [];
             let filesToIgnore = [];
@@ -2647,7 +2648,7 @@ class FilesTab extends Tab {
         this.updateSelectedCounter();
     }
 
-    updateSelectedCounter () {
+    updateSelectedCounter() {
         if (this.simple) {
             this.$fileCounter.html(this.selectedFiles.size === 0 ? intl('stats.files.selected.no') : this.selectedFiles.size);
         } else {
@@ -2655,7 +2656,7 @@ class FilesTab extends Tab {
         }
     }
 
-    updateEntrySearchResults () {
+    updateEntrySearchResults() {
         this.updateSelectedCounter();
 
         const prefixes = this.$filter_prefix.dropdown('get value');
@@ -2707,12 +2708,12 @@ class FilesTab extends Tab {
             return `
                 <tr data-tr-mark="${_uuid(entry)}" ${entry.hidden ? 'style="color: gray;"' : ''}>
                     <td class="cursor-pointer !text-center" data-mark="${_uuid(entry)}"><i class="square outline icon"></i></td>
-                    <td class="!text-center">${ this.timeMap[entry.timestamp] }</td>
-                    <td class="!text-center">${ this.prefixMap[entry.prefix] }</td>
+                    <td class="!text-center">${this.timeMap[entry.timestamp]}</td>
+                    <td class="!text-center">${this.prefixMap[entry.prefix]}</td>
                     <td class="!text-center"><i class="ui ${isPlayer ? 'blue user' : 'orange users'} icon"></i></td>
-                    <td>${ entry.name }</td>
-                    <td>${ isPlayer ? (this.groupMap[entry.group] || '') : '' }</td>
-                    <td class="flex gap-1 flex-wrap">${ _wrapOrEmpty(entry.tag).map((tag) => `<div class="ui horizontal label" style="background-color: ${_strToHSL(tag)}; color: white; margin: 0;">${tag}</div>`).join('') }</td>
+                    <td>${entry.name}</td>
+                    <td>${isPlayer ? (this.groupMap[entry.group] || '') : ''}</td>
+                    <td class="flex gap-1 flex-wrap">${_wrapOrEmpty(entry.tag).map((tag) => `<div class="ui horizontal label" style="background-color: ${_strToHSL(tag)}; color: white; margin: 0;">${tag}</div>`).join('')}</td>
                 </tr>
             `
         });
@@ -2733,7 +2734,7 @@ class FilesTab extends Tab {
                     const selectDown = startSelectorIndex < endSelectorIndex;
                     const elementArray = selectDown ? $startSelector.nextUntil($endSelector) : $endSelector.nextUntil($startSelector);
                     // Get list of timestamps to be changed
-                    const toChange = [ uuid, this.lastSelectedEntry ];
+                    const toChange = [uuid, this.lastSelectedEntry];
                     for (const obj of elementArray.toArray()) {
                         toChange.push(obj.dataset.trMark);
                     }
@@ -2772,7 +2773,7 @@ class FilesTab extends Tab {
         });
     }
 
-    updateFileSearchResults () {
+    updateFileSearchResults() {
         let currentFilesAll = (Site.options.groups_empty ? Array.from(DatabaseManager.Timestamps.keys()) : DatabaseManager.PlayerTimestamps).map((ts) => {
             let playerCount = 0;
             let groupCount = 0;
@@ -2818,7 +2819,7 @@ class FilesTab extends Tab {
             currentFilesAll = currentFilesAll.filter(({ tags: { tagList }, timestamp, version }) => {
                 return this.expressionFilter.eval(new ExpressionScope().addSelf(
                     Object.assign(
-                        DatabaseManager.getFile(null, [ timestamp ]),
+                        DatabaseManager.getFile(null, [timestamp]),
                         {
                             timestamp,
                             version,
@@ -2838,11 +2839,11 @@ class FilesTab extends Tab {
             return `
                 <tr data-tr-timestamp="${timestamp}" ${hidden ? 'style="color: gray;"' : ''}>
                     <td class="cursor-pointer !text-center" data-timestamp="${timestamp}"><i class="square outline icon"></i></td>
-                    <td class="!text-center">${ prettyDate }</td>
-                    <td class="!text-center">${ playerCount }</td>
-                    <td class="!text-center">${ groupCount }</td>
-                    <td class="flex gap-1 flex-wrap">${ tagContent }</td>
-                    <td class="!text-center">${ version || 'Not known' }</td>
+                    <td class="!text-center">${prettyDate}</td>
+                    <td class="!text-center">${playerCount}</td>
+                    <td class="!text-center">${groupCount}</td>
+                    <td class="flex gap-1 flex-wrap">${tagContent}</td>
+                    <td class="!text-center">${version || 'Not known'}</td>
                     <td class="!text-center"></td>
                     <td class="cursor-pointer !text-center" data-edit="${timestamp}"><i class="wrench icon"></i></td>
                 </tr>
@@ -2865,7 +2866,7 @@ class FilesTab extends Tab {
                     const selectDown = startSelectorIndex < endSelectorIndex;
                     const elementArray = selectDown ? $startSelector.nextUntil($endSelector) : $endSelector.nextUntil($startSelector);
                     // Get list of timestamps to be changed
-                    const toChange = [ timestamp, this.lastSelectedTimestamp ];
+                    const toChange = [timestamp, this.lastSelectedTimestamp];
                     for (const obj of elementArray.toArray()) {
                         toChange.push(parseInt(obj.dataset.trTimestamp));
                     }
@@ -2911,8 +2912,8 @@ class FilesTab extends Tab {
         });
     }
 
-    updateTagFilterButtons () {
-        const selector = `[data-tag="${ typeof this.tagFilter === 'undefined' ? '*' : this.tagFilter }"]`;
+    updateTagFilterButtons() {
+        const selector = `[data-tag="${typeof this.tagFilter === 'undefined' ? '*' : this.tagFilter}"]`;
 
         this.$tagFilter.find('[data-tag]').addClass('basic inverted').css('color', '').css('background-color', '');
 
@@ -2926,7 +2927,7 @@ class FilesTab extends Tab {
         }
     }
 
-    updateFileList () {
+    updateFileList() {
         // Tag filters
         let currentTags = Object.keys(DatabaseManager.getTagsForTimestamp());
         if (currentTags.length > 1 || (currentTags.length == 1 && currentTags[0] !== 'undefined')) {
@@ -3006,7 +3007,7 @@ class FilesTab extends Tab {
         }).val(this.expressionFilter ? this.expressionFilter.string : '').trigger('change');
     }
 
-    updateEntryLists () {
+    updateEntryLists() {
         this.prefixMap = _arrayToHash(DatabaseManager.Prefixes, (prefix) => [prefix, _formatPrefix(prefix)]);
         this.timeMap = _arrayToHash(Array.from(DatabaseManager.Timestamps.keys()), (ts) => [ts, _formatDate(ts)]);
         this.playerMap = DatabaseManager.PlayerNames;
@@ -3048,32 +3049,32 @@ class FilesTab extends Tab {
             <div class="field">
                 <label>${intl('stats.files.filters.timestamp')} (<span data-op="unique-timestamp"></span> ${intl('stats.files.filters.n_unique')})</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-timestamp">
-                    ${ this.timeArray.map(([timestamp, value]) => `<option value="${ timestamp }">${ value }</option>`).join('') }
+                    ${this.timeArray.map(([timestamp, value]) => `<option value="${timestamp}">${value}</option>`).join('')}
                 </select>
             </div>
             <div class="field">
                 <label>${intl('stats.files.filters.player')} (<span data-op="unique-player"></span> ${intl('stats.files.filters.n_unique')})</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-player">
-                    ${ Object.entries(this.playerMap).map(([identifier, name]) => `<option value="${ identifier }">${ name }${ playerNameFrequency[name] > 1 ? ` - ${_formatPrefix(identifier)}` : '' }</option>`).join('') }
+                    ${Object.entries(this.playerMap).map(([identifier, name]) => `<option value="${identifier}">${name}${playerNameFrequency[name] > 1 ? ` - ${_formatPrefix(identifier)}` : ''}</option>`).join('')}
                 </select>
             </div>
             <div class="field">
                 <label>${intl('stats.files.filters.group')} (<span data-op="unique-group"></span> ${intl('stats.files.filters.n_unique')})</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-group">
-                    ${ Object.entries(this.groupMap).map(([identifier, name]) => `<option value="${ identifier }">${ name }${ groupNameFrequency[name] > 1 ? ` - ${_formatPrefix(identifier)}` : '' }</option>`).join('') }
+                    ${Object.entries(this.groupMap).map(([identifier, name]) => `<option value="${identifier}">${name}${groupNameFrequency[name] > 1 ? ` - ${_formatPrefix(identifier)}` : ''}</option>`).join('')}
                 </select>
             </div>
             <div class="field">
                 <label>${intl('stats.files.filters.prefix')} (<span data-op="unique-prefix"></span> ${intl('stats.files.filters.n_unique')})</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-prefix">
-                    ${ Object.entries(this.prefixMap).map(([prefix, value]) => `<option value="${ prefix }">${ value }</option>`).join('') }
+                    ${Object.entries(this.prefixMap).map(([prefix, value]) => `<option value="${prefix}">${value}</option>`).join('')}
                 </select>
             </div>
             <div class="field">
                 <label>${intl('stats.files.filters.tags')} (<span data-op="unique-tags"></span> ${intl('stats.files.filters.n_unique')})</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-tags">
                     <option value="undefined">${intl('stats.files.tags.none')}</option>
-                    ${ this.tagsArray.map((tag) => `<option value="${ tag }">${ tag }</option>`).join('') }
+                    ${this.tagsArray.map((tag) => `<option value="${tag}">${tag}</option>`).join('')}
                 </select>
             </div>
             <div class="field">
@@ -3084,7 +3085,7 @@ class FilesTab extends Tab {
                     <option value="2">${intl('stats.files.filters.ownership_other')}</option>
                 </select>
             </div>
-            <div class="field" ${ Site.options.hidden ? '' : 'style="display: none;"' }>
+            <div class="field" ${Site.options.hidden ? '' : 'style="display: none;"'}>
                 <label>${intl('stats.files.filters.hidden')}</label>
                 <select class="ui fluid search selection inverted dropdown" multiple="" data-op="files-search-hidden">
                     <option value="yes">${intl('general.yes')}</option>
@@ -3140,7 +3141,7 @@ class FilesTab extends Tab {
         this.updateEntrySearchResults();
     }
 
-    show (params) {
+    show(params) {
         this.selectedEntries = new Map();
         this.selectedFiles = new Set();
 
@@ -3169,7 +3170,7 @@ class FilesTab extends Tab {
 }
 
 class ScriptsTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         // Left sidebar
@@ -3209,7 +3210,7 @@ class ScriptsTab extends Tab {
                 }
             })
         });
- 
+
         // Actions
         this.$copy = this.$parent.operator('copy');
         this.$copy.click(() => {
@@ -3235,7 +3236,7 @@ class ScriptsTab extends Tab {
         this.$import = this.$parent.operator('import');
         this.$import.change(async (event) => {
             const text = await _dig(event, 'currentTarget', 'files', 0).text();
- 
+
             this.editor.content = text;
         });
 
@@ -3251,9 +3252,9 @@ class ScriptsTab extends Tab {
 
             SiteAPI.post('script_create', { name, description, version, author: Site.options.script_author, content }).then(({ script }) => {
                 this.script = Scripts.markRemote(key, script);
-        
+
                 StoreCache.invalidate('remote_scripts');
-        
+
                 Scripts.remoteAdd(script.key, { version: script.version, updated_at: Date.parse(script.updated_at) });
 
                 this.#updateSidebars();
@@ -3303,9 +3304,9 @@ class ScriptsTab extends Tab {
 
                     SiteAPI.get('script_delete', { key: remoteKey, secret: remoteSecret }).then(() => {
                         this.script = Scripts.markRemote(key);
-                
+
                         StoreCache.invalidate('remote_scripts');
-                
+
                         Scripts.remoteRemove(remoteKey);
 
                         this.#updateSidebars();
@@ -3459,7 +3460,7 @@ class ScriptsTab extends Tab {
                 this.#contentChanged(val !== '');
             }
         })
-        
+
         this.editor.subscribe('ctrl+s', () => {
             this.#saveScript(false);
         })
@@ -3512,7 +3513,7 @@ class ScriptsTab extends Tab {
         })
     }
 
-    #verifyRemoteRequirements () {
+    #verifyRemoteRequirements() {
         if (Site.options.script_author) {
             return false;
         } else {
@@ -3522,14 +3523,14 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #saveScript (allowReturn) {
+    #saveScript(allowReturn) {
         if (this.$save.hasClass('disabled')) {
             return;
         }
 
         if (this.script) {
             this.save();
-    
+
             if (allowReturn && this.returnTo) {
                 this.returnTo();
             }
@@ -3541,10 +3542,10 @@ class ScriptsTab extends Tab {
                     if (this.target) {
                         Scripts.assign(this.target, this.script.key);
                     }
-    
+
                     this.#updateSidebars();
                     this.#contentChanged(false);
-    
+
                     if (allowReturn && this.returnTo) {
                         this.returnTo();
                     }
@@ -3553,10 +3554,10 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #updateScript () {
+    #updateScript() {
         if (this.script) {
             const { name, description, version, remote, updated_at } = this.script;
-            
+
             this.$script.html(`
                 <div>
                     <div class="wrap-none overflow-hidden text-overflow-ellipsis font-bold" title="${_escape(name)}">${_escape(name)}</div>
@@ -3572,7 +3573,7 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #updateButtons () {
+    #updateButtons() {
         if (UI.current !== this) {
             return;
         }
@@ -3653,11 +3654,11 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #hasArchivedPreviousVersion () {
+    #hasArchivedPreviousVersion() {
         return this.script && this.script.version > 1 && ScriptArchive.find('overwrite', this.script.key, this.script.version - 1);
     }
 
-    remove () {
+    remove() {
         Scripts.remove(this.script.key);
 
         if (Scripts.isAssignedTo(this.target, this.script.key)) {
@@ -3673,7 +3674,7 @@ class ScriptsTab extends Tab {
         }
     }
 
-    show ({ origin, identifier, blank, key }) {
+    show({ origin, identifier, blank, key }) {
         if ([UI.players, UI.groups, UI.groups_grid, UI.group, UI.players_grid, UI.player].includes(origin)) {
             this.returnTo = () => UI.returnTo(origin);
         } else if (typeof origin !== 'undefined') {
@@ -3694,14 +3695,14 @@ class ScriptsTab extends Tab {
                     this.#setScript(script.key)
                 } else if (this.target) {
                     this.editor.content = DefaultScripts.getContent(this.#getDefaultScript(this.target));
-    
+
                     this.#contentChanged(true);
                 } else {
                     this.#contentChanged(false);
                 }
             } else {
                 this.editor.content = '';
-    
+
                 this.#contentChanged(false);
             }
         }
@@ -3712,7 +3713,7 @@ class ScriptsTab extends Tab {
         this.#updateTarget();
     }
 
-    #updateTarget () {
+    #updateTarget() {
         const values = [
             { value: '', name: intl('stats.scripts.targets.none'), icon: 'text-gray globe' },
             { type: 'header', name: intl('stats.scripts.targets_category.default') },
@@ -3749,7 +3750,7 @@ class ScriptsTab extends Tab {
         })
     }
 
-    #getDefaultScript (target) {
+    #getDefaultScript(target) {
         if (target === 'player' || target === 'players' || target === 'group' || target === 'groups') {
             return target;
         } else if (DatabaseManager.isPlayer(target)) {
@@ -3759,7 +3760,7 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #setScript (key) {
+    #setScript(key) {
         this.script = Scripts.findScript(key);
 
         if (this.script) {
@@ -3771,7 +3772,7 @@ class ScriptsTab extends Tab {
         this.#contentChanged(false);
     }
 
-    save () {
+    save() {
         this.script = Scripts.update(this.script.key, {
             content: this.editor.content
         });
@@ -3780,7 +3781,7 @@ class ScriptsTab extends Tab {
         this.#contentChanged(false);
     }
 
-    #contentChanged (changed) {
+    #contentChanged(changed) {
         if (this.script && changed) {
             this.$reset.removeClass('disabled');
         } else {
@@ -3794,7 +3795,7 @@ class ScriptsTab extends Tab {
         }
     }
 
-    hide () {
+    hide() {
         if (this.script) {
             if (this.script.content !== this.editor.content) {
                 ScriptArchive.add('discard', this.script.key, this.script.version, this.editor.content);
@@ -3804,7 +3805,7 @@ class ScriptsTab extends Tab {
         }
     }
 
-    #updateSearch () {
+    #updateSearch() {
         const value = this.$listSearch.val().toLowerCase();
 
         this.$parent.find('[data-script-name]').each((_, element) => {
@@ -3816,7 +3817,7 @@ class ScriptsTab extends Tab {
         })
     }
 
-    #updateSidebars () {
+    #updateSidebars() {
         let content = `
             <div data-script-add class="!border-radius-1 border-gray border-dashed p-4 background-dark background-light:hover cursor-pointer flex gap-2 items-center">
                 <div class="flex gap-2 items-center text-gray">
@@ -3871,13 +3872,13 @@ class ScriptsTab extends Tab {
                     if (source !== '_current') {
                         this.hide();
                     }
-    
+
                     const { key } = Scripts.create(script);
-    
+
                     if (this.target) {
                         Scripts.assign(this.target, key);
                     }
-        
+
                     this.#setScript(key);
                     this.#updateSidebars();
                 }
@@ -3903,7 +3904,7 @@ class ScriptsTab extends Tab {
 }
 
 class SettingsTab extends Tab {
-    constructor (parent) {
+    constructor(parent) {
         super(parent)
 
         this.$dropdownTab = this.$parent.find('[data-op="dropdown-tab"]');
@@ -3989,7 +3990,7 @@ class SettingsTab extends Tab {
                     Loader.toggle(true);
 
                     await DatabaseManager.resetLinks();
-    
+
                     Loader.toggle(false);
                 }
             })
@@ -4016,14 +4017,14 @@ class SettingsTab extends Tab {
                     await DatabaseManager.importLinks(
                         await _dig(event, 'currentTarget', 'files', 0).text().then((fileContent) => JSON.parse(fileContent))
                     )
-    
+
                     Loader.toggle(false);
                 }
             })
         })
     }
 
-    async exportDumpFile () {
+    async exportDumpFile() {
         Loader.toggle(true);
 
         Exporter.json(
@@ -4034,7 +4035,7 @@ class SettingsTab extends Tab {
         Loader.toggle(false);
     }
 
-    importDumpFile (fileEvent) {
+    importDumpFile(fileEvent) {
         Dialog.open(
             ConfirmationDialog,
             intl('stats.settings.recovery.title'),
@@ -4046,32 +4047,32 @@ class SettingsTab extends Tab {
                 Loader.toggle(true);
 
                 Toast.info(intl('stats.settings.recovery.title'), intl('stats.settings.recovery.toast'));
-    
+
                 let data = await _dig(fileEvent, 'currentTarget', 'files', 0).text().then(fileContent => JSON.parse(fileContent));
                 await Site.recover(data);
-    
+
                 window.location.href = window.location.href;
             }
         })
     }
 
     // Prepare checkbox
-    prepareCheckbox (property) {
-        this.$parent.find(`[data-op="checkbox-${ property.replaceAll('_', '-') }"]`).checkbox({
+    prepareCheckbox(property) {
+        this.$parent.find(`[data-op="checkbox-${property.replaceAll('_', '-')}"]`).checkbox({
             onChecked: () => { Site.options[property] = true },
             onUnchecked: () => { Site.options[property] = false }
         }).checkbox(Site.options[property] ? 'set checked' : 'set unchecked');
     }
 
-    show () {
+    show() {
         this.editor.content = Actions.getScript();
     }
 }
 
 class ProfilesTab extends Tab {
-    static get PLAYER_EXPRESSION_CONFIG () {
+    static get PLAYER_EXPRESSION_CONFIG() {
         delete this.PLAYER_EXPRESSION_CONFIG;
- 
+
         const config = DEFAULT_EXPRESSION_CONFIG.clone();
         for (const name of ['timestamp', 'identifier', 'prefix', 'tag', 'version', 'own', 'name', 'identifier', 'group', 'groupname', 'save']) {
             config.register('accessor', 'none', name, (object) => object[name]);
@@ -4080,9 +4081,9 @@ class ProfilesTab extends Tab {
         return (this.PLAYER_EXPRESSION_CONFIG = config);
     }
 
-    static get GROUP_EXPRESSION_CONFIG () {
+    static get GROUP_EXPRESSION_CONFIG() {
         delete this.GROUP_EXPRESSION_CONFIG;
- 
+
         const config = DEFAULT_EXPRESSION_CONFIG.clone();
         for (const name of ['timestamp', 'identifier', 'prefix', 'own', 'name', 'identifier', 'save']) {
             config.register('accessor', 'none', name, (object) => object[name]);
@@ -4091,13 +4092,13 @@ class ProfilesTab extends Tab {
         return (this.GROUP_EXPRESSION_CONFIG = config);
     }
 
-    constructor (parent) {
+    constructor(parent) {
         super(parent);
 
         this.$list = this.$parent.find('[data-op="list"]')
     }
 
-    show () {
+    show() {
         let content = '';
         for (const [key, profile] of ProfileManager.getProfiles()) {
             const { name, primary, secondary, primary_g, secondary_g } = profile;
@@ -4105,19 +4106,18 @@ class ProfilesTab extends Tab {
             content += `
                 <div class="row" style="margin-top: 1em; border: 1px solid grey; border-radius: .25em;">
                     <div class="four wide column">
-                        <h3 class="ui inverted ${ key == ProfileManager.getActiveProfileName() ? 'orange' : '' } header">
+                        <h3 class="ui inverted ${key == ProfileManager.getActiveProfileName() ? 'orange' : ''} header">
                             <span data-key="${key}" class="cursor-pointer">${name}</span><br/>
-                            ${ profile.slot ? `<span style="font-size: 90%;">Slot ${profile.slot}</span><br>` : '' }
+                            ${profile.slot ? `<span style="font-size: 90%;">Slot ${profile.slot}</span><br>` : ''}
                             <span style="font-size: 90%;">(${key})</span>
                         </h3>
-                        ${
-                            ProfileManager.isEditable(key) ? `
+                        ${ProfileManager.isEditable(key) ? `
                                 <div style="position: absolute; left: 1em; bottom: 0;">
                                     <i class="cursor-pointer trash alternate outline icon !text-red:hover" data-delete="${key}"></i>
                                     <i class="cursor-pointer wrench icon" style="margin-left: 1em;" data-edit="${key}"></i>
                                 </div>
                             ` : ''
-                        }
+                }
                     </div>
                     <div class="twelve wide column">
                         <table class="ui basic black inverted table" style="table-layout: fixed;">
@@ -4128,13 +4128,13 @@ class ProfilesTab extends Tab {
                             </tr>
                             <tr>
                                 <td>${intl('stats.profiles.primary')}</td>
-                                <td>${ this.showRules(primary) }</td>
-                                <td>${ this.showRules(primary_g) }</td>
+                                <td>${this.showRules(primary)}</td>
+                                <td>${this.showRules(primary_g)}</td>
                             </tr>
                             <tr>
                                 <td>${intl('stats.profiles.secondary')}</td>
-                                <td>${ secondary ? Highlighter.expression(secondary, undefined, ProfilesTab.PLAYER_EXPRESSION_CONFIG).text : `<b>${intl('stats.profiles.none')}</b>` }</td>
-                                <td>${ secondary_g ? Highlighter.expression(secondary_g, undefined, ProfilesTab.GROUP_EXPRESSION_CONFIG).text : `<b>${intl('stats.profiles.none')}</b>` }</td>
+                                <td>${secondary ? Highlighter.expression(secondary, undefined, ProfilesTab.PLAYER_EXPRESSION_CONFIG).text : `<b>${intl('stats.profiles.none')}</b>`}</td>
+                                <td>${secondary_g ? Highlighter.expression(secondary_g, undefined, ProfilesTab.GROUP_EXPRESSION_CONFIG).text : `<b>${intl('stats.profiles.none')}</b>`}</td>
                             </tr>
                         </table>
                     </div>
@@ -4175,13 +4175,13 @@ class ProfilesTab extends Tab {
         });
     }
 
-    addProfile () {
+    addProfile() {
         Dialog.open(ProfileCreateDialog).then(([value]) => {
             if (value) this.show();
         })
     }
 
-    showRules (rule) {
+    showRules(rule) {
         if (rule) {
             const { name, mode, value } = rule;
             if (mode == 'between') {
@@ -4194,7 +4194,7 @@ class ProfilesTab extends Tab {
         }
     }
 
-    stringifyMode (v) {
+    stringifyMode(v) {
         return {
             'above': '>',
             'below': '<',
@@ -4203,7 +4203,7 @@ class ProfilesTab extends Tab {
     }
 }
 
-Site.ready({ name: 'stats', requires: ['translations_items'] }, function (urlParams) {
+Site.ready({ name: 'stats', requires: ['translations_items'] }, function(urlParams) {
     let profile = ProfileManager.getProfile(urlParams.get('profile'));
     if (urlParams.has('temp')) {
         Store.temporary();
@@ -4218,7 +4218,7 @@ Site.ready({ name: 'stats', requires: ['translations_items'] }, function (urlPar
     }
 
     Loader.toggle(true);
-    DatabaseManager.load(profile).then(function () {
+    DatabaseManager.load(profile).then(function() {
         UI.register([
             {
                 tab: new PlayersGridTab('view-players-grid'),
@@ -4284,25 +4284,25 @@ Site.ready({ name: 'stats', requires: ['translations_items'] }, function (urlPar
                 buttonDisabled: urlParams.has('temp')
             }
         ],
-        {
-            activeTab: urlParams.has('temp') ? 'files' : Store.session.get('activeTab', urlParams.get('tab') || Site.options.tab),
-            defaultTab: 'groups_grid',
-            onTabChange: (tabName) => {
-                Store.session.set('activeTab', tabName);
-            }
-        });
+            {
+                activeTab: urlParams.has('temp') ? 'files' : Store.session.get('activeTab', urlParams.get('tab') || Site.options.tab),
+                defaultTab: 'groups_grid',
+                onTabChange: (tabName) => {
+                    Store.session.set('activeTab', tabName);
+                }
+            });
 
         Loader.toggle(false);
 
         // If reminders are enabled, invoke reminder if time expired
         if (!profile.temporary && Site.options.backup_reminder_frequency && Site.options.backup_reminder_timestamp < Date.now()) {
-          Dialog.open(
-            BackupReminderDialog
-          )
+            Dialog.open(
+                BackupReminderDialog
+            )
 
-          Site.options.backup_reminder_timestamp = Date.now() + [0, 2592000000, 604800000][Site.options.backup_reminder_frequency];
+            Site.options.backup_reminder_timestamp = Date.now() + [0, 2592000000, 604800000][Site.options.backup_reminder_frequency];
         }
-    }).catch(function (e) {
+    }).catch(function(e) {
         Loader.toggle(false);
         Dialog.open(ErrorDialog, `<h4 class="ui inverted header text-center">${intl('database.fatal_error#')}</h4><br>${e.message}`);
         Logger.error(e, 'Database could not be opened!');

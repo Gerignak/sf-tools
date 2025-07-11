@@ -1,8 +1,8 @@
-function copyJSON (json) {
+function copyJSON(json) {
     copyText(JSON.stringify(json));
 }
 
-function copyText (text) {
+function copyText(text) {
     const element = document.createElement('textarea');
     element.value = text;
     document.body.appendChild(element);
@@ -12,7 +12,7 @@ function copyText (text) {
     window.getSelection().removeAllRanges();
 }
 
-function copyNode (node) {
+function copyNode(node) {
     let range = document.createRange();
     range.selectNode(node);
     window.getSelection().removeAllRanges();
@@ -26,7 +26,7 @@ const FIELD_R = '\u203A';
 
 const FIELD_REGEXP = /\u2039|\u203A/g;
 
-function wrapFields (content, all = false) {
+function wrapFields(content, all = false) {
     if (all) {
         return content.replace(/<([a-z \|]+)>|\(([a-z \|]+)\)/g, `${FIELD_L}$1$2${FIELD_R}`);
     } else {
@@ -179,37 +179,37 @@ const COLOR_MAP = new Map(Object.entries({
 }));
 
 class Constants {
-    constructor (values = null) {
+    constructor(values = null) {
         this.Values = values || Constants.DEFAULT_CONSTANTS_VALUES;
     }
 
-    get (key) {
+    get(key) {
         return this.Values.get(key);
     }
 
-    fetch (key) {
+    fetch(key) {
         return this.Values.has(key) ? this.Values.get(key) : key;
     }
 
-    has (key) {
+    has(key) {
         return this.Values.has(key);
     }
 
-    add (key, value) {
+    add(key, value) {
         this.Values.set(`@${key}`, value);
     }
 
-    keys () {
+    keys() {
         return this.Values.keys();
     }
 
-    static get DEFAULT () {
+    static get DEFAULT() {
         delete this.DEFAULT;
 
         return (this.DEFAULT = new this());
     }
 
-    static get DEFAULT_CONSTANTS_VALUES () {
+    static get DEFAULT_CONSTANTS_VALUES() {
         delete this.DEFAULT_CONSTANTS_VALUES;
 
         return (this.DEFAULT_CONSTANTS_VALUES = new Map([
@@ -242,6 +242,7 @@ class Constants {
                 'bard': 9,
                 'necromancer': 10,
                 'paladin': 11,
+                'plaguedoctor': 12,
                 'empty': '',
                 'tiny': 40,
                 'small': 60,
@@ -272,7 +273,7 @@ class Constants {
 class SignalSource {
     #listeners = []
 
-    emit (event, ...args) {
+    emit(event, ...args) {
         for (const { event: _event, listener } of this.#listeners) {
             if (event === _event) {
                 listener(...args);
@@ -280,7 +281,7 @@ class SignalSource {
         }
     }
 
-    subscribe (event, listener) {
+    subscribe(event, listener) {
         this.#listeners.push({ event, listener });
     }
 }
@@ -289,11 +290,11 @@ class Workers {
     static #fetchCache = new Map();
     static #objectCache = new Map();
 
-    static get local () {
+    static get local() {
         return document.location.protocol == 'file:';
     }
 
-    static async #fetchContent (location) {
+    static async #fetchContent(location) {
         if (!this.#fetchCache.has(location)) {
             let url = `${this.local ? 'https://sftools.mar21.eu' : ''}/${location}`;
 
@@ -303,7 +304,7 @@ class Workers {
         return this.#fetchCache.get(location);
     }
 
-    static async #fetchObject (type) {
+    static async #fetchObject(type) {
         if (!this.#objectCache.has(type)) {
             let blob = new Blob([
                 (await this.#fetchContent('js/sim/base.js')) + (await this.#fetchContent(`js/sim/${type}.js`))
@@ -315,38 +316,38 @@ class Workers {
         return this.#objectCache.get(type);
     }
 
-    static async prefetch (type) {
+    static async prefetch(type) {
         await this.#fetchObject(type);
     }
 
-    static async createWorker (type) {
+    static async createWorker(type) {
         return new Worker(await this.#fetchObject(type));
     }
 
-    static invalidate () {
+    static invalidate() {
         this.#fetchCache.clear();
         this.#objectCache.clear();
     }
 }
 
 class WorkerBatch {
-    constructor (type) {
+    constructor(type) {
         this.type = type;
         this.workers = [];
     }
 
-    async #nextWorker () {
+    async #nextWorker() {
         if (this.workers.length > 0) {
             const index = this.workers.findIndex(([, params]) => this.activeParams.every((_params) => this.instanceCondition(params, _params)));
 
             if (index !== -1) {
                 const [callback, params] = this.workers.splice(index, 1)[0];
                 this.activeParams.push(params);
-    
+
                 const worker = await Workers.createWorker(this.type);
                 worker.addEventListener('message', ({ data }) => {
                     callback(data, Date.now() - this.timestamp);
-    
+
                     Loader.progress(++this.workersDone / this.workersTotal);
 
                     this.activeParams.splice(
@@ -360,13 +361,13 @@ class WorkerBatch {
                         this.#nextWorker();
                     }
                 })
-    
+
                 worker.postMessage(params);
             }
         }
     }
 
-    skip (predicate) {
+    skip(predicate) {
         for (let i = 0; i < this.workers.length; i++) {
             // Remove worker if predicate is true
             if (predicate(this.workers[i][1])) {
@@ -376,15 +377,15 @@ class WorkerBatch {
         }
     }
 
-    add (callback, params) {
-        this.workers.push([ callback, params ]);
+    add(callback, params) {
+        this.workers.push([callback, params]);
     }
 
-    size () {
+    size() {
         return this.workers.length;
     }
 
-    run (instances, instanceCondition = () => true) {
+    run(instances, instanceCondition = () => true) {
         // Initial timestamp
         this.timestamp = Date.now();
 
@@ -485,8 +486,8 @@ function formatAsNamedNumber(rn) {
     }
 }
 
-function getColorFromGradientObj (obj, sample) {
-    var stops = Object.entries(obj).map(e => [ Number(e[0]), e[1] ]);
+function getColorFromGradientObj(obj, sample) {
+    var stops = Object.entries(obj).map(e => [Number(e[0]), e[1]]);
     stops.sort((a, b) => a[0] - b[0]);
     if (sample < stops[0][0]) sample = stops[0][0];
     else if (sample > stops[stops.length - 1][0]) sample = stops[stops.length - 1][0];
@@ -519,7 +520,7 @@ function getColorFromGradient(a, b, sample) {
     return color;
 }
 
-function getColorFromHSLA (h, s, l, a) {
+function getColorFromHSLA(h, s, l, a) {
     let r, g, b;
 
     h = _clamp(parseInt(h), 0, 360) / 360;
@@ -529,12 +530,12 @@ function getColorFromHSLA (h, s, l, a) {
     if (s == 0) {
         r = g = b = l;
     } else {
-        const hue2rgb = function (p, q, t) {
+        const hue2rgb = function(p, q, t) {
             if (t < 0) t += 1;
             if (t > 1) t -= 1;
-            if (t < 1/6) return p + (q - p) * 6 * t;
-            if (t < 1/2) return q;
-            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
             return p;
         }
 
@@ -548,7 +549,7 @@ function getColorFromHSLA (h, s, l, a) {
     return getColorFromRGBA(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a);
 }
 
-function getColorFromRGBA (r, g, b, a) {
+function getColorFromRGBA(r, g, b, a) {
     var hr = Number(Math.trunc(_clamp(r, 0, 255))).toString(16);
     var hg = Number(Math.trunc(_clamp(g, 0, 255))).toString(16);
     var hb = Number(Math.trunc(_clamp(b, 0, 255))).toString(16);
@@ -559,7 +560,7 @@ function getColorFromRGBA (r, g, b, a) {
 
 const GET_COLOR_FROM_NAME_CACHE = new Map();
 
-function _getColorFromName (name) {
+function _getColorFromName(name) {
     if (COLOR_MAP.has(name)) {
         return COLOR_MAP.get(name);
     } else {
@@ -573,14 +574,14 @@ function _getColorFromName (name) {
         } else if (css.startsWith('rgb')) {
             var obj = css.split(/^rgb\((.*), (.*), (.*)\)$/g);
 
-            return getColorFromRGBA(Number(obj[1]), Number(obj[2]), Number(obj[3]),  1);
+            return getColorFromRGBA(Number(obj[1]), Number(obj[2]), Number(obj[3]), 1);
         } else {
             return name;
         }
     }
 }
 
-function getColorFromName (name) {
+function getColorFromName(name) {
     if (GET_COLOR_FROM_NAME_CACHE.has(name)) {
         return GET_COLOR_FROM_NAME_CACHE.get(name);
     } else {
@@ -592,7 +593,7 @@ function getColorFromName (name) {
     }
 }
 
-function toCSSColor (color) {
+function toCSSColor(color) {
     let style = new Option().style;
     style.color = color;
     return style.color;
@@ -600,7 +601,7 @@ function toCSSColor (color) {
 
 const GET_CSS_COLOR_CACHE = new Map();
 
-function _getCSSColor (color) {
+function _getCSSColor(color) {
     if (COLOR_MAP.has(color)) {
         return toCSSColor(COLOR_MAP.get(color));
     } else if (/^\#([\da-fA-F]{8}|[\da-fA-F]{6}|[\da-fA-F]{3,4})$/.test(color)) {
@@ -616,7 +617,7 @@ function _getCSSColor (color) {
     }
 }
 
-function getCSSColor (name) {
+function getCSSColor(name) {
     if (GET_CSS_COLOR_CACHE.has(name)) {
         return GET_CSS_COLOR_CACHE.get(name);
     } else {
@@ -630,7 +631,7 @@ function getCSSColor (name) {
 
 const GET_CSS_BACKGROUND_CACHE = new Map();
 
-function _getCSSBackground (color) {
+function _getCSSBackground(color) {
     let c = getCSSColor(color);
     if (c) {
         return c;
@@ -643,7 +644,7 @@ function _getCSSBackground (color) {
     }
 }
 
-function getCSSBackground (name) {
+function getCSSBackground(name) {
     if (GET_CSS_BACKGROUND_CACHE.has(name)) {
         return GET_CSS_BACKGROUND_CACHE.get(name);
     } else {
@@ -657,13 +658,13 @@ function getCSSBackground (name) {
 
 const GET_CSS_COLOR_FROM_BACKGROUND_CACHE = new Map();
 
-function _getCSSColorFromBackground (string) {
+function _getCSSColorFromBackground(string) {
     var style = new Option().style;
     style.background = string;
     return style['background-color'];
 }
 
-function getCSSColorFromBackground (name) {
+function getCSSColorFromBackground(name) {
     if (GET_CSS_COLOR_FROM_BACKGROUND_CACHE.has(name)) {
         return GET_CSS_COLOR_FROM_BACKGROUND_CACHE.get(name);
     } else {
@@ -679,7 +680,7 @@ function getCSSFont(string) {
     var style = new Option().style;
     style.font = string;
     if (style.font == '') {
-        style.font = `${ string } Roboto`;
+        style.font = `${string} Roboto`;
     }
 
     return style.font;
@@ -691,38 +692,38 @@ function formatAsSpacedNumber(n, delim = '&nbsp') {
 }
 
 class ComplexDataType {
-    constructor (values) {
+    constructor(values) {
         this.values = values || [];
         this.ptr = 0;
         this.bytes = [];
     }
 
-    empty () {
+    empty() {
         return this.values.length <= this.ptr;
     }
 
-    atLeast (size) {
+    atLeast(size) {
         return (this.ptr + size) <= this.values.length;
     }
 
-    long () {
+    long() {
         return this.values[this.ptr++] || 0;
     }
 
-    peek () {
+    peek() {
         return this.values[this.ptr] || 0;
     }
 
-    string () {
+    string() {
         return this.values[this.ptr++] || '';
     }
 
-    split () {
+    split() {
         var word = this.long();
         this.bytes = [word % 0x100, (word >> 8) % 0x100, (word >> 16) % 0x100, (word >> 24) % 0x100];
     }
 
-    short () {
+    short() {
         if (!this.bytes.length) {
             this.split();
         }
@@ -730,7 +731,7 @@ class ComplexDataType {
         return this.bytes.shift() + (this.bytes.shift() << 8);
     }
 
-    byte () {
+    byte() {
         if (!this.bytes.length) {
             this.split();
         }
@@ -738,7 +739,7 @@ class ComplexDataType {
         return this.bytes.shift();
     }
 
-    byteArray (len) {
+    byteArray(len) {
         const array = [];
         for (let i = 0; i < len; i++) {
             array.push(this.byte());
@@ -747,34 +748,34 @@ class ComplexDataType {
         return array;
     }
 
-    assert (size) {
+    assert(size) {
         if (this.values.length < size) {
-            throw `ComplexDataType Exception: Expected ${ size } values but ${ this.values.length } were supplied!`;
+            throw `ComplexDataType Exception: Expected ${size} values but ${this.values.length} were supplied!`;
         }
     }
 
-    sub (size) {
+    sub(size) {
         var b = this.values.slice(this.ptr, this.ptr + size);
         this.ptr += size;
         return b;
     }
 
-    clear () {
+    clear() {
         this.bytes = [];
     }
 
-    skip (size) {
+    skip(size) {
         this.ptr += size;
         return this;
     }
 
-    back (size) {
+    back(size) {
         this.ptr -= size;
         return this;
     }
 }
 
-function getObjectAt (obj, path) {
+function getObjectAt(obj, path) {
     if (!obj) return undefined;
     var sub = path.split('.');
     for (var i = 0; i < sub.length; i++) {
@@ -786,14 +787,14 @@ function getObjectAt (obj, path) {
     return obj;
 }
 
-function setObjectAt (obj, path, val) {
+function setObjectAt(obj, path, val) {
     var sub = path.split('.');
     for (var i = 0; i < sub.length; i++) {
         if (i == sub.length - 1) {
             obj[sub[i]] = val;
         } else {
             if (obj[sub[i]] == undefined) {
-                obj[sub[i]] = { };
+                obj[sub[i]] = {};
             }
 
             obj = obj[sub[i]];
@@ -801,12 +802,12 @@ function setObjectAt (obj, path, val) {
     }
 }
 
-function SHA1 (text) {
-    function rotate_left (n, s) {
+function SHA1(text) {
+    function rotate_left(n, s) {
         return (n << s) | (n >>> (32 - s));
     }
 
-    function cvt_hex (val) {
+    function cvt_hex(val) {
         var str = '';
         for (var i = 7; i >= 0; i--) {
             str += ((val >>> (i * 4)) & 0x0f).toString(16);
@@ -815,7 +816,7 @@ function SHA1 (text) {
         return str;
     }
 
-    function encodeUTF8 (text) {
+    function encodeUTF8(text) {
         text = text.replace(/\r\n/g, '\n');
         var utf = '';
 
@@ -927,9 +928,9 @@ function SHA1 (text) {
         H4 = (H4 + E) & 0x0ffffffff;
     }
 
-    return (cvt_hex(H0) + cvt_hex(H1) /* + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4) */ ).toLowerCase();
+    return (cvt_hex(H0) + cvt_hex(H1) /* + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4) */).toLowerCase();
 }
 
-function randomSHA1 () {
+function randomSHA1() {
     return SHA1(Math.random().toString()).slice(0, 8);
 }
