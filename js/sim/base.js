@@ -357,7 +357,7 @@ const CONFIG = Object.defineProperties(
             SkipVariant: DEFENSE_TYPE_NONE,
 
             EffectRounds: 4,
-            EffectBaseDuration: [1, 1, 2],
+            EffectBaseDuration: [3, 3, 4],
             EffectBaseChance: [25, 50, 25],
             EffectValues: [0.2, 0.4, 0.6]
         },
@@ -497,6 +497,8 @@ const CONFIG = Object.defineProperties(
 
             TinctureChance: 0.55,
             DelayAfterTincture: true,
+//            ImmediateAttackAfterThrow: true,
+            TinctureEndsAfterEnemyAttack: false,
             Tinctures: [
                 {
                     Duration: 3,
@@ -1289,14 +1291,14 @@ class BardModel extends SimulatorModel {
         this.Bracket1 = this.Bracket0 + this.Config.EffectBaseChance[1];
         this.Bracket2 = this.Bracket1 + this.Config.EffectBaseChance[2];
 
-        // Bonus round
-        this.BonusRounds = 0;
+					  
+							 
 
-        const attribute = this.getAttribute(this);
-        const constitution = this.Player.Constitution.Total * (1 + (this.Snack.ConstitutionBonus ?? 0));
+												  
+																										
 
-        this.BonusRounds++;
-        this.BonusRounds++;
+						   
+						   
     }
 
     resetInternalState() {
@@ -1349,7 +1351,7 @@ class BardModel extends SimulatorModel {
         const level = roll <= this.Bracket0 ? 0 : (roll <= this.Bracket1 ? 1 : 2);
 
         this.EffectLevel = level + 1;
-        this.EffectReset = this.Config.EffectBaseDuration[level] + this.BonusRounds;
+        this.EffectReset = this.Config.EffectBaseDuration[level];
         this.EffectCounter = 0;
         this.EffectRound = 0;
 
@@ -1610,9 +1612,13 @@ class PlagueDoctorModel extends SimulatorModel {
         // Remove poison if expired
         if (this.PoisonDuration <= 0) {
             this.delayFlag = this.Config.DelayAfterTincture;
-            this.Poison = null;
-            this.PoisonType = null;
-            this.enterState();
+            if (!this.Config.TinctureEndsAfterEnemyAttack) {
+                this.Poison = null;
+                this.PoisonType = null;
+                this.enterState();
+            } else {
+                this.delayFlag = true;
+            }
         }
     }
 
@@ -1654,7 +1660,7 @@ class PlagueDoctorModel extends SimulatorModel {
 
     control(instance, target) {
         if (target.Config.BypassSpecial) {
-            // Necromancer cannot summon against mages
+            // PD cannot throw against mages
             super.control(instance, target);
         } else if (this.Poison && !this.delayFlag) {
             // Take control as poison
@@ -1669,7 +1675,7 @@ class PlagueDoctorModel extends SimulatorModel {
 
             this.expirePoison(target);
         } else if (getRandom(this.Config.TinctureChance) && !this.delayFlag) {
-            // Increment range to 'waste' a turn
+												
 
             this.summonPoison(target);
 
@@ -1682,18 +1688,26 @@ class PlagueDoctorModel extends SimulatorModel {
 
 
 
-            // Attack after summon
-            //this.enterState();
-            //super.control(instance, target);
+            // Attack after throw
+//            if (this.Config.ImmediateAttackAfterThrow) {
+                //this.enterState();
+                //super.control(instance, target);
+//            }
+
             if (!this.summonFailed) {
                 this.enterState(this.Poison);
             }
             this.summonFailed = false;
 
 
-            //this.expirePoison(target);
+            //this.expirePoison(target); //playa treated throwing potion and the poison duration seperatly, by not expiring the length is extended by 1
 
         } else {
+            if (this.delayFlag) {
+                this.Poison = null;
+                this.PoisonType = null;
+                this.enterState();
+            }
             this.delayFlag = false;
             // Attack as usual
             super.control(instance, target);
