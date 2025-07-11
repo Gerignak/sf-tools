@@ -753,7 +753,7 @@ class Localization {
 
         $('.ui.huge.menu').append($picker);
 
-        this.translation = await this.#fetchTranslation(locale, '/js/lang/{{locale}}.json');
+        this.translation = await this.#fetchTranslation(locale, '/sf-tools/js/lang/{{locale}}.json');
 
         for (const [path, translationPath] of injections) {
             Object.assign(this.translation, await this.#fetchTranslation(locale, path, translationPath));
@@ -851,9 +851,9 @@ window.intl = Localization.intl.bind(Localization);
 window.addEventListener('DOMContentLoaded', async function () {
     const injections = []
 
-    if (Site.requires('translations_general')) injections.push(['/js/playa/lang/{{locale}}/general.json', ['general']])
-    if (Site.requires('translations_monsters')) injections.push(['/js/playa/lang/{{locale}}/monsters.json', ['monsters']])
-    if (Site.requires('translations_items')) injections.push(['/js/playa/lang/{{locale}}/items.json', ['items']])
+    if (Site.requires('translations_general')) injections.push(['/sf-tools/js/playa/lang/{{locale}}/general.json', ['general']])
+    if (Site.requires('translations_monsters')) injections.push(['/sf-tools/js/playa/lang/{{locale}}/monsters.json', ['monsters']])
+    if (Site.requires('translations_items')) injections.push(['/sf-tools/js/playa/lang/{{locale}}/items.json', ['items']])
 
     await Localization.translatePage(injections);
 

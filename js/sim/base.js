@@ -1570,42 +1570,53 @@ class NecromancerModel extends SimulatorModel {
 
 class PlagueDoctorModel extends SimulatorModel {
     initializeData(target) {
+        this.delayFlag = false; // Default value
+        this.summonFailed = false; // Default value
         super.initializeData(target);
 
-        this.delayFlag = false; // Default value
-        this.Data.Tinctures = this.Config.Tinctures.map((tincture) => this.createState(target, tincture));
+        this.Data.Poisons = this.Config.Tinctures.map((tincture) => this.createState(target, tincture));
     }
 
     resetInternalState() {
         super.resetInternalState();
-        this.Tincture = null;
-        this.delayFlag = false;
+
+        this.Poison = null;
     }
 
     getCurrentEffectsForLog() {
-        if (this.Tincture) {
+        if (this.Poison) {
             return [{
                 type: EFFECT_TYPE_TINCTURE,
-                duration: this.TinctureDuration,
-                tier: this.TinctureType
+                duration: this.PoisonDuration,
+                tier: this.PoisonType
             }]
         } else {
             return []
         }
     }
 
-    expireTincture() {
-        this.TinctureDuration--;
+    summonPoison(target) {
+        const type = Math.trunc(Math.random() * 3);
+        const poison = this.Data.Poisons[type];
 
-        if (this.TinctureDuration <= 0) {
+        this.Poison = poison;
+        this.PoisonType = type + 1;
+        this.PoisonDuration = poison.Config.Duration;
+    }
+
+    expirePoison(target) {
+        this.PoisonDuration--;
+
+        // Remove poison if expired
+        if (this.PoisonDuration <= 0) {
             this.delayFlag = this.Config.DelayAfterTincture;
-            this.Tincture = null;
-            this.TinctureType = null;
+            this.Poison = null;
+            this.PoisonType = null;
             this.enterState();
         }
     }
 
-    tincturePoisonTick(instance, target) {
+    attackPoison(instance, target) {
         const weapon = this.State.Weapon1;
 
         this.attack(
@@ -1619,15 +1630,7 @@ class PlagueDoctorModel extends SimulatorModel {
         )
     }
 
-    throwTincture(instance, target) {
-        const type = Math.trunc(Math.random() * 3);
-        const tincture = this.Data.Tinctures[type];
-
-        this.Tincture = tincture;
-        this.TinctureType = type + 1;
-
-        this.enterState(this.Tincture);
-
+    initialAttackPoison(instance, target) {
         const weapon = this.State.Weapon1;
         const dodged = target.skip(SKIP_TYPE_DEFAULT);
 
@@ -1642,43 +1645,53 @@ class PlagueDoctorModel extends SimulatorModel {
         )
 
         if (dodged) {
-            // Remove tincture if it was dodged
-            this.Tincture = null;
-            this.TinctureType = null;
-        }
-        else {
-            this.TinctureDuration = tincture.Config.Duration;
+            // Remove poison and leave state
+            this.Poison = null;
+            this.enterState();
+            this.summonFailed = true;
         }
     }
 
     control(instance, target) {
         if (target.Config.BypassSpecial) {
-            // Can't throw tinctures against mages 
+            // Necromancer cannot summon against mages
             super.control(instance, target);
-        } else if (this.Tincture) {
-            // Damage from tincture's poison 
-            this.enterState(this.Tincture);
-            this.tincturePoisonTick(instance, target);
+        } else if (this.Poison && !this.delayFlag) {
+            // Take control as poison
+            this.enterState(this.Poison);
+            this.attackPoison(instance, target);
 
             // Take control as player
             this.enterState();
             super.control(instance, target);
+            this.enterState(this.Poison);
 
-            // Enter as tincture to get evade chance back
-            this.enterState(this.Tincture);
 
-            this.expireTincture();
-        } else if (!this.delayFlag && getRandom(this.Config.TinctureChance)) {
-            this.throwTincture(instance, target);
+            this.expirePoison(target);
+        } else if (getRandom(this.Config.TinctureChance) && !this.delayFlag) {
+            // Increment range to 'waste' a turn
 
-            this.enterState();
-            super.control(instance, target);
+            this.summonPoison(target);
 
-            if (this.Tincture) {
-                this.enterState(this.Tincture);
+            // Enter summon state
+            this.enterState(this.Poison);
+
+            // Attack as poison
+            this.initialAttackPoison(instance, target);
+            //            this.expirePoison(target);
+
+
+
+            // Attack after summon
+            //this.enterState();
+            //super.control(instance, target);
+            if (!this.summonFailed) {
+                this.enterState(this.Poison);
             }
+            this.summonFailed = false;
 
-            this.expireTincture();
+
+            //this.expirePoison(target);
 
         } else {
             this.delayFlag = false;

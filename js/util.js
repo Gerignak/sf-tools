@@ -296,7 +296,7 @@ class Workers {
 
     static async #fetchContent(location) {
         if (!this.#fetchCache.has(location)) {
-            let url = `${this.local ? 'https://sftools.mar21.eu' : ''}/${location}`;
+            let url = `${this.local ? 'https://sftools.mar21.eu' : ''}/sf-tools/${location}`;
 
             this.#fetchCache.set(location, await fetch(url).then(data => data.text()));
         }
